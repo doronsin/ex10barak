@@ -8,19 +8,40 @@ import asteroid as ast
 import torpedo as tor
 
 DEFAULT_ASTEROIDS_NUM = 5
-DEG_TO_RAD_COEFFICIENT = 0.0174532925
 
 
 class GameRunner:
     """
     This class responsible of running the game of asteroids and ships
     """
-    ASTEROID_STARTING_SIZE = 3
-    SCORE_DICT = {3: 20, 2: 50, 1: 100}  # keys: size of asteroid destroyed, values: the score "reward"
-    BLOW_ASTEROID_DICT = {3: 2, 2: 1, 1: 0}  # keys: size of current asteroid, values: the size of the new asteroids
-    NUMBER_OF_ASTEROIDS_AFTER_TORPEDO_HIT = 2
+    DEG_TO_RAD_COEFFICIENT = 0.0174532925
+
+    # messages constants
+    ASTEROID_INTERSECTION_MSG = 'BOOM'
+    ASTEROID_INTERSECTION_TITLE = 'Ship - Asteroid intersection'
+    WIN_MSG = 'WELL DONE, YOU WON'
+    WIN_TITLE = 'win'
+    LOST_MSG = 'GAVE OVER'
+    LOST_TITLE = 'lost'
+    USER_QUIT_MSG = 'SEE YOU SOON'
+    USER_QUIT_TITLE = 'user_quit'
+
+    LEFT_INDICATOR = 'left'
+    RIGHT_IDICATOR = 'right'
+
+    TORPEDO_ACCELERATE_FACTOR = 2
     TORPEDO_LIFE = 200
     MAX_TORPEDO = 10
+
+    SHIP_DIRECTION_CHANGE_IN_DEGREES = 7
+    STARTING_SHIP_DIRECTION = 0
+    SCORE_DICT = {3: 20, 2: 50, 1: 100}  # keys: size of asteroid destroyed, values: the score "reward"
+
+    ASTEROID_MAXIMUM_SPEED = 4
+    ASTEROID_MINIMUM_SPEED = 1
+    ASTEROID_STARTING_SIZE = 3
+    NUMBER_OF_ASTEROIDS_AFTER_TORPEDO_HIT = 2
+    BLOW_ASTEROID_DICT = {3: 2, 2: 1, 1: 0}  # keys: size of current asteroid, values: the size of the new asteroids
 
     def __init__(self, asteroids_amount=DEFAULT_ASTEROIDS_NUM):
         """
@@ -44,14 +65,14 @@ class GameRunner:
 
     def create_ship(self):
         ship_xy_location = self.random_location_xy()
-        ship = sh.Ship(ship_xy_location[0], 0, ship_xy_location[1], 0, 0)
+        ship = sh.Ship(ship_xy_location[0], 0, ship_xy_location[1], 0, GameRunner.STARTING_SHIP_DIRECTION)
         ship.draw_ship(self.__screen)
         return ship
 
     def create_asteroids(self, asteroids_amount):
         for i in range(asteroids_amount):
-            aster_vx = random.randint(1, 4)
-            aster_vy = random.randint(1, 4)
+            aster_vx = random.randint(GameRunner.ASTEROID_MINIMUM_SPEED, GameRunner.ASTEROID_MAXIMUM_SPEED)
+            aster_vy = random.randint(GameRunner.ASTEROID_MINIMUM_SPEED, GameRunner.ASTEROID_MAXIMUM_SPEED)
             aster_xy_location = self.random_location_xy()  # assigning random location
             new_ast = ast.Asteroid(aster_xy_location[0], aster_vx, aster_xy_location[1], aster_vy,
                                    self.ASTEROID_STARTING_SIZE)
@@ -70,8 +91,8 @@ class GameRunner:
         returns a new random location in the board
         :return: new random location in the board
         """
-        return random.randint(self.__screen_min_x,
-                              self.__screen_max_x), random.randint(self.__screen_min_y, self.__screen_max_y)
+        return random.randint(self.__screen_min_x, self.__screen_max_x), random.randint(self.__screen_min_y,
+                                                                                        self.__screen_max_y)
 
     def run(self):
         """
@@ -106,7 +127,7 @@ class GameRunner:
         """
         This function responsible to accelerate the ship's speed
         """
-        deg_in_rad = DEG_TO_RAD_COEFFICIENT * self.__ship.get_deg()
+        deg_in_rad = GameRunner.DEG_TO_RAD_COEFFICIENT * self.__ship.get_deg()
         new_speed_x = self.__ship.get_vx() + math.cos(deg_in_rad)
         new_speed_y = self.__ship.get_vy() + math.sin(deg_in_rad)
         ship.set_vx(new_speed_x)
@@ -118,10 +139,10 @@ class GameRunner:
         :param direction: str: 'right' or 'left'
         :return:
         """
-        if direction == 'right':
-            i = self.__ship.get_deg() - 7
+        if direction == GameRunner.RIGHT_IDICATOR:
+            i = self.__ship.get_deg() - GameRunner.SHIP_DIRECTION_CHANGE_IN_DEGREES
         else:
-            i = self.__ship.get_deg() + 7
+            i = self.__ship.get_deg() + GameRunner.SHIP_DIRECTION_CHANGE_IN_DEGREES
         self.__ship.set_deg(i)
 
     def asteroid_ship_intersection(self, asteroid):
@@ -129,7 +150,7 @@ class GameRunner:
         This function is called when a ship hit an asteroid. It creates a massage, reduces ships life and unregister the
         asteroid
         """
-        self.__screen.show_message('Ship - Asteroid intersection', 'BOOM')
+        self.__screen.show_message(GameRunner.ASTEROID_INTERSECTION_TITLE, GameRunner.ASTEROID_INTERSECTION_MSG)
         self.__screen.remove_life()
         self.__ship.set_life(self.__ship.get_life() - 1)
         asteroid.unregister_asteroid(self.__screen)
@@ -143,9 +164,9 @@ class GameRunner:
         if len(self.__torpedos) < self.MAX_TORPEDO:
             torpedo_x = self.__ship.get_x()
             torpedo_y = self.__ship.get_y()
-            deg_in_rad = DEG_TO_RAD_COEFFICIENT * self.__ship.get_deg()
-            torpedo_vx = self.__ship.get_vx() + 2 * math.cos(deg_in_rad)
-            torpedo_vy = self.__ship.get_vy() + 2 * math.sin(deg_in_rad)
+            deg_in_rad = GameRunner.DEG_TO_RAD_COEFFICIENT * self.__ship.get_deg()
+            torpedo_vx = self.__ship.get_vx() + GameRunner.TORPEDO_ACCELERATE_FACTOR * math.cos(deg_in_rad)
+            torpedo_vy = self.__ship.get_vy() + GameRunner.TORPEDO_ACCELERATE_FACTOR * math.sin(deg_in_rad)
             new_torpedo = tor.Torpedo(torpedo_x, torpedo_vx, torpedo_y, torpedo_vy, self.__ship.get_deg())
             self.__torpedos.append(new_torpedo)
             new_torpedo.register_torpedo(self.__screen)
@@ -223,13 +244,13 @@ class GameRunner:
         This function check if one of the conditions to end the game is valid
         """
         if len(self.__asteroids) == 0:
-            self.__screen.show_message('win', 'WELL DONE, YOU WON')
+            self.__screen.show_message(GameRunner.WIN_TITLE, GameRunner.WIN_MSG)
             self.end_game()
         elif self.__ship.get_life() == 0:
-            self.__screen.show_message('lost', 'GAVE OVER')
+            self.__screen.show_message(GameRunner.LOST_TITLE, GameRunner.LOST_MSG)
             self.end_game()
         elif self.__screen.should_end():
-            self.__screen.show_message('user_quit', 'SEE YOU SOON')
+            self.__screen.show_message(GameRunner.USER_QUIT_TITLE, GameRunner.USER_QUIT_MSG)
             self.end_game()
 
     def end_game(self):
@@ -242,10 +263,10 @@ class GameRunner:
     def _game_loop(self):
 
         if self.__screen.is_right_pressed():
-            self.rotate_ship('right')
+            self.rotate_ship(GameRunner.RIGHT_IDICATOR)
 
         if self.__screen.is_left_pressed():
-            self.rotate_ship('left')
+            self.rotate_ship(GameRunner.LEFT_INDICATOR)
 
         if self.__screen.is_up_pressed():
             self.accelerate_ship(self.__ship)
