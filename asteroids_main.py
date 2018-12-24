@@ -50,16 +50,20 @@ class GameRunner:
 
     def create_asteroids(self, asteroids_amount):
         for i in range(asteroids_amount):
+            aster_vx = random.randint(1, 4)
+            aster_vy = random.randint(1, 4)
             aster_xy_location = self.random_location_xy()  # assigning random location
-            # Checking that the asteroid's location is not the same as the ship's location
-            if aster_xy_location != (self.__ship.get_x(), self.__ship.get_y()):
-                aster_vx = random.randint(1, 4)
-                aster_vy = random.randint(1, 4)
-                # Building, registering and drawing the asteroid
-                self.__asteroids.append(ast.Asteroid(aster_xy_location[0], aster_vx, aster_xy_location[1], aster_vy,
-                                                     self.ASTEROID_STARTING_SIZE))
-                self.__asteroids[i].register_asteroid(self.__screen)
-                self.__asteroids[i].draw_asteroid(self.__screen)
+            new_ast = ast.Asteroid(aster_xy_location[0], aster_vx, aster_xy_location[1], aster_vy,
+                                   self.ASTEROID_STARTING_SIZE)
+            # randomizing places until there is no collision with the ship's place
+            while new_ast.has_intersection(self.__ship):
+                aster_xy_location = self.random_location_xy()  # assigning random location
+                new_ast = ast.Asteroid(aster_xy_location[0], aster_vx, aster_xy_location[1], aster_vy,
+                                       self.ASTEROID_STARTING_SIZE)
+            # Building, registering and drawing the asteroid
+            self.__asteroids.append(new_ast)
+            new_ast.register_asteroid(self.__screen)
+            new_ast.draw_asteroid(self.__screen)
 
     def random_location_xy(self):
         """
@@ -150,7 +154,7 @@ class GameRunner:
         """
         Draw the torpedo on the screen for 200 rounds. After that delete it
         """
-        if torpedo.life <= self.TORPEDO_LIFE:
+        if torpedo.get_torpedo_life() <= self.TORPEDO_LIFE:
             self.move_object(torpedo)
             torpedo.draw_torpedo(self.__screen)
             torpedo.set_life(torpedo.get_torpedo_life() + 1)
