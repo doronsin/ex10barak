@@ -243,7 +243,7 @@ class GameRunner:
         self.move_object(self.ship)
         self.ship.draw_ship(self.__screen)
 
-        # This part םכ the code deals with asterodis: It loops over the asteroids, moves and draw them
+        # This part of the code deals with asterodis: It loops over the asteroids, moves and draw them
 
         for asteroid in self.asteroids:
             self.move_object(asteroid)
