@@ -16,7 +16,7 @@ class GameRunner:
     This class responsible of running the game of asteroids and ships
     """
     ASTEROID_STARTING_SIZE = 3
-    SCORE_DICT = {3: 20, 2: 50, 1: 100}
+    SCORE_DICT = {3: 20, 2: 50, 1: 100}  # keys: size of asteroid destroyed, values: the score "reward"
     BLOW_ASTEROID_DICT = {3: 2, 2: 1, 1: 0}  # keys: size of current asteroid, values: the size of the new asteroids
     NUMBER_OF_ASTEROIDS_AFTER_TORPEDO_HIT = 2
     TORPEDO_LIFE = 200
@@ -37,15 +37,22 @@ class GameRunner:
         self.__score = 0
 
         # place the ship on the screen in a random location
-        ship_xy_location = self.random_location_xy()
-        self.__ship = sh.Ship(ship_xy_location[0], 0, ship_xy_location[1], 0, 0)
-        self.__ship.draw_ship(self.__screen)
+        self.__ship = self.create_ship()
 
         # Here we are creating the asteroids
+        self.create_asteroids(asteroids_amount)
+
+    def create_ship(self):
+        ship_xy_location = self.random_location_xy()
+        ship = sh.Ship(ship_xy_location[0], 0, ship_xy_location[1], 0, 0)
+        ship.draw_ship(self.__screen)
+        return ship
+
+    def create_asteroids(self, asteroids_amount):
         for i in range(asteroids_amount):
             aster_xy_location = self.random_location_xy()  # assigning random location
             # Checking that the asteroid's location is not the same as the ship's location
-            if aster_xy_location != ship_xy_location:
+            if aster_xy_location != (self.__ship.get_x(), self.__ship.get_y()):
                 aster_vx = random.randint(1, 4)
                 aster_vy = random.randint(1, 4)
                 # Building, registering and drawing the asteroid
