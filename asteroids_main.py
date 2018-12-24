@@ -110,7 +110,7 @@ class GameRunner:
         '''
         self.__screen.show_message('Ship - Asteroid intersection', 'BOOM')
         self.__screen.remove_life()
-        self.ship.set_life(-1)
+        self.ship.set_life(self.ship.get_life()-1)
         asteroid.unregister_asteroid(self.__screen)
         self.asteroids.remove(asteroid)
 
@@ -135,7 +135,7 @@ class GameRunner:
         if torpedo.life <= self.TORPEDO_LIFE:
             self.move_object(torpedo)
             torpedo.draw_torpedo(self.__screen)
-            torpedo.set_life(1)
+            torpedo.set_life(torpedo.get_torpedo_life()+1)
         else:
             torpedo.unregister_torpedo(self.__screen)
             self.torpedos.remove((torpedo))

@@ -39,7 +39,7 @@ class Torpedo:
         self.y = y
 
     def set_life(self, life):
-        self.life += life
+        self.life = life
 
     def draw_torpedo(self, screen):
         screen.draw_torpedo(self, self.x, self.y, self.deg)
