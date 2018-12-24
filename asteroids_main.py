@@ -32,14 +32,14 @@ class GameRunner:
         self.__screen_max_y = Screen.SCREEN_MAX_Y
         self.__screen_min_x = Screen.SCREEN_MIN_X
         self.__screen_min_y = Screen.SCREEN_MIN_Y
-        self.asteroids = []
-        self.torpedos = []
-        self.score = 0
+        self.__asteroids = []
+        self.__torpedos = []
+        self.__score = 0
 
         # place the ship on the screen in a random location
         ship_xy_location = self.random_location_xy()
-        self.ship = sh.Ship(ship_xy_location[0], 0, ship_xy_location[1], 0, 0)
-        self.ship.draw_ship(self.__screen)
+        self.__ship = sh.Ship(ship_xy_location[0], 0, ship_xy_location[1], 0, 0)
+        self.__ship.draw_ship(self.__screen)
 
         # Here we are creating the asteroids
         for i in range(asteroids_amount):
@@ -49,10 +49,10 @@ class GameRunner:
                 aster_vx = random.randint(1, 4)
                 aster_vy = random.randint(1, 4)
                 # Building, registering and drawing the asteroid
-                self.asteroids.append(ast.Asteroid(aster_xy_location[0], aster_vx, aster_xy_location[1], aster_vy,
-                                                   self.ASTEROID_STARTING_SIZE))
-                self.asteroids[i].register_asteroid(self.__screen)
-                self.asteroids[i].draw_asteroid(self.__screen)
+                self.__asteroids.append(ast.Asteroid(aster_xy_location[0], aster_vx, aster_xy_location[1], aster_vy,
+                                                     self.ASTEROID_STARTING_SIZE))
+                self.__asteroids[i].register_asteroid(self.__screen)
+                self.__asteroids[i].draw_asteroid(self.__screen)
 
     def random_location_xy(self):
         """
@@ -95,9 +95,9 @@ class GameRunner:
         """
         This function responsible to accelerate the ship's speed
         """
-        deg_in_rad = DEG_TO_RAD_COEFFICIENT * self.ship.get_deg()
-        new_speed_x = self.ship.get_vx() + math.cos(deg_in_rad)
-        new_speed_y = self.ship.get_vy() + math.sin(deg_in_rad)
+        deg_in_rad = DEG_TO_RAD_COEFFICIENT * self.__ship.get_deg()
+        new_speed_x = self.__ship.get_vx() + math.cos(deg_in_rad)
+        new_speed_y = self.__ship.get_vy() + math.sin(deg_in_rad)
         ship.set_vx(new_speed_x)
         ship.set_vy(new_speed_y)
 
@@ -108,10 +108,10 @@ class GameRunner:
         :return:
         """
         if direction == 'right':
-            i = self.ship.get_deg() - 7
+            i = self.__ship.get_deg() - 7
         else:
-            i = self.ship.get_deg() + 7
-        self.ship.set_deg(i)
+            i = self.__ship.get_deg() + 7
+        self.__ship.set_deg(i)
 
     def asteroid_ship_intersection(self, asteroid):
         """
@@ -120,23 +120,23 @@ class GameRunner:
         """
         self.__screen.show_message('Ship - Asteroid intersection', 'BOOM')
         self.__screen.remove_life()
-        self.ship.set_life(self.ship.get_life() - 1)
+        self.__ship.set_life(self.__ship.get_life() - 1)
         asteroid.unregister_asteroid(self.__screen)
-        self.asteroids.remove(asteroid)
+        self.__asteroids.remove(asteroid)
 
     def create_torpedo(self):
         """
         This function create and register a torpedo
         """
         # It only create the torpedo if there are less then 10 torpedos in self.torpedo list
-        if len(self.torpedos) < self.MAX_TORPEDO:
-            torpedo_x = self.ship.get_x()
-            torpedo_y = self.ship.get_y()
-            deg_in_rad = DEG_TO_RAD_COEFFICIENT * self.ship.get_deg()
-            torpedo_vx = self.ship.get_vx() + 2 * math.cos(deg_in_rad)
-            torpedo_vy = self.ship.get_vy() + 2 * math.sin(deg_in_rad)
-            new_torpedo = tor.Torpedo(torpedo_x, torpedo_vx, torpedo_y, torpedo_vy, self.ship.get_deg())
-            self.torpedos.append(new_torpedo)
+        if len(self.__torpedos) < self.MAX_TORPEDO:
+            torpedo_x = self.__ship.get_x()
+            torpedo_y = self.__ship.get_y()
+            deg_in_rad = DEG_TO_RAD_COEFFICIENT * self.__ship.get_deg()
+            torpedo_vx = self.__ship.get_vx() + 2 * math.cos(deg_in_rad)
+            torpedo_vy = self.__ship.get_vy() + 2 * math.sin(deg_in_rad)
+            new_torpedo = tor.Torpedo(torpedo_x, torpedo_vx, torpedo_y, torpedo_vy, self.__ship.get_deg())
+            self.__torpedos.append(new_torpedo)
             new_torpedo.register_torpedo(self.__screen)
 
     def draw_torpedo(self, torpedo):
@@ -149,20 +149,20 @@ class GameRunner:
             torpedo.set_life(torpedo.get_torpedo_life() + 1)
         else:
             torpedo.unregister_torpedo(self.__screen)
-            self.torpedos.remove(torpedo)
+            self.__torpedos.remove(torpedo)
 
     def asteroid_torpedo_intersection(self, torpedo, asteroid):
         """
         This function is called when a torpedo hits an asteroid. It is updating the score, unregister the asteroid and
         call the blow() function (see below)
         """
-        self.score += self.SCORE_DICT[asteroid.get_size()]
-        self.__screen.set_score(self.score)
+        self.__score += self.SCORE_DICT[asteroid.get_size()]
+        self.__screen.set_score(self.__score)
         self.blow(asteroid, torpedo)
         asteroid.unregister_asteroid(self.__screen)
-        self.asteroids.remove(asteroid)
+        self.__asteroids.remove(asteroid)
         self.__screen.unregister_torpedo(torpedo)
-        self.torpedos.remove(torpedo)
+        self.__torpedos.remove(torpedo)
 
     def blow(self, asrto, torp):
         """
@@ -176,9 +176,9 @@ class GameRunner:
         if new_size > 0:  # if the new size is 0 then the function wont create more asteroids
             new_asteroid1 = ast.Asteroid(x, vx, y, vy, new_size)
             new_asteroid2 = ast.Asteroid(x, -vx, y, -vy, new_size)
-            self.asteroids.append(new_asteroid1)
+            self.__asteroids.append(new_asteroid1)
             new_asteroid1.register_asteroid(self.__screen)
-            self.asteroids.append(new_asteroid2)
+            self.__asteroids.append(new_asteroid2)
             new_asteroid2.register_asteroid(self.__screen)
 
     def is_not_empty_space(self, ship_xy_location):
@@ -187,7 +187,7 @@ class GameRunner:
         :param ship_xy_location:
         :return: True if the ship will land at a place with asteroid, false otherwise
         """
-        for i in self.asteroids:
+        for i in self.__asteroids:
             astr_xy_location = i.get_x(), i.get_y()
             if ship_xy_location == astr_xy_location:
                 return True
@@ -205,16 +205,16 @@ class GameRunner:
         x, y = ship_xy_location
         ship.set_x(x)
         ship.set_y(y)
-        self.move_object(self.ship)
+        self.move_object(self.__ship)
 
     def check_if_end(self):
         """
         This function check if one of the conditions to end the game is valid
         """
-        if len(self.asteroids) == 0:
+        if len(self.__asteroids) == 0:
             self.__screen.show_message('win', 'WELL DONE, YOU WON')
             self.end_game()
-        elif self.ship.get_life() == 0:
+        elif self.__ship.get_life() == 0:
             self.__screen.show_message('lost', 'GAVE OVER')
             self.end_game()
         elif self.__screen.should_end():
@@ -237,29 +237,29 @@ class GameRunner:
             self.rotate_ship('left')
 
         if self.__screen.is_up_pressed():
-            self.accelerate_ship(self.ship)
+            self.accelerate_ship(self.__ship)
 
         if self.__screen.is_space_pressed():
             self.create_torpedo()
 
         if self.__screen.is_teleport_pressed():
-            self.teleport_ship(self.ship)
+            self.teleport_ship(self.__ship)
 
-        for torpedo in self.torpedos:
+        for torpedo in self.__torpedos:
             self.draw_torpedo(torpedo)
 
-        self.move_object(self.ship)
-        self.ship.draw_ship(self.__screen)
+        self.move_object(self.__ship)
+        self.__ship.draw_ship(self.__screen)
 
         # This part of the code deals with asterodis: It loops over the asteroids, moves and draw them
 
-        for asteroid in self.asteroids:
+        for asteroid in self.__asteroids:
             self.move_object(asteroid)
             asteroid.draw_asteroid(self.__screen)
-            if asteroid.has_intersection(self.ship):  # check for intersection between asteroid and ship
+            if asteroid.has_intersection(self.__ship):  # check for intersection between asteroid and ship
                 self.asteroid_ship_intersection(asteroid)
                 break
-            for torpedo in self.torpedos:  # check for intersection between asteroid and torpedo
+            for torpedo in self.__torpedos:  # check for intersection between asteroid and torpedo
                 if asteroid.has_intersection(torpedo):
                     self.asteroid_torpedo_intersection(torpedo, asteroid)
 

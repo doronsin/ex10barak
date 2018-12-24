@@ -14,47 +14,47 @@ class Ship:
         :param vy: speed in the y-axis
         :param deg: direction of the ship in degrees
         """
-        self.x = x
-        self.vx = vx
-        self.y = y
-        self.vy = vy
-        self.deg = deg
-        self.life = self.LIFE
+        self.__x = x
+        self.__vx = vx
+        self.__y = y
+        self.__vy = vy
+        self.__deg = deg
+        self.__life = self.LIFE
 
     def get_x(self):
         """
         getter for x
         :return: x
         """
-        return self.x
+        return self.__x
 
     def get_vx(self):
         """
         getter for vx
         :return: vx
         """
-        return self.vx
+        return self.__vx
 
     def get_y(self):
         """
         getter for y
         :return: y
         """
-        return self.y
+        return self.__y
 
     def get_vy(self):
         """
         getter for vy
         :return: y
         """
-        return self.vy
+        return self.__vy
 
     def get_deg(self):
         """
         getter for deg
         :return: deg
         """
-        return self.deg
+        return self.__deg
 
     def get_radius(self):
         """
@@ -68,49 +68,49 @@ class Ship:
         returns the number of lives remained to the ship
         :return:
         """
-        return self.life
+        return self.__life
 
     def set_deg(self, deg):
         """
         setter for deg
         :param deg: the new deg
         """
-        self.deg = deg
+        self.__deg = deg
 
     def set_x(self, x):
         """
         setter for x
         :param x: the new x
         """
-        self.x = x
+        self.__x = x
 
     def set_y(self, y):
         """
         setter for y
         :param y: the new y
         """
-        self.y = y
+        self.__y = y
 
     def set_life(self, n):
         """
         setter for the life
         :param n: the new number of lives
         """
-        self.life = n
+        self.__life = n
 
     def draw_ship(self, screen):
         """
         draws the ship on the screen "screen"
         :param screen: the screen which the ship should be drawn on
         """
-        screen.draw_ship(self.x, self.y, self.deg)
+        screen.draw_ship(self.__x, self.__y, self.__deg)
 
     def set_vx(self, new_speed_x):
         """
         setter for vx
         :param new_speed_x: the new vx
         """
-        self.vx = new_speed_x
+        self.__vx = new_speed_x
 
     def set_vy(self, new_speed_y):
         """
@@ -118,4 +118,4 @@ class Ship:
         :param new_speed_y: the new vy
         :return:
         """
-        self.vy = new_speed_y
+        self.__vy = new_speed_y
