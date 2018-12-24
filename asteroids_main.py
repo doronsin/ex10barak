@@ -44,7 +44,7 @@ class GameRunner:
                 # Building, registering and drawing the asteroid
                 self.asteroids.append(asteroid.Asteroid(aster_xy_location[0],aster_vx, aster_xy_location[1], aster_vy,\
                                                         self.ASTEROID_STARTING_SIZE))
-                self.asteroids[i].register_asteroid(self.__screen ,self.ASTEROID_STARTING_SIZE)
+                self.asteroids[i].register_asteroid(self.__screen)
                 self.asteroids[i].draw_asteroid(self.__screen)
 
 
@@ -168,9 +168,9 @@ class GameRunner:
             new_asteroid1 = asteroid.Asteroid(x, vx, y, vy, new_size)
             new_asteroid2 = asteroid.Asteroid(x, -vx, y, -vy, new_size)
             self.asteroids.append(new_asteroid1)
-            new_asteroid1.register_asteroid(self.__screen, new_size)
+            new_asteroid1.register_asteroid(self.__screen)
             self.asteroids.append(new_asteroid2)
-            new_asteroid2.register_asteroid(self.__screen, new_size)
+            new_asteroid2.register_asteroid(self.__screen)
 
     def is_not_empty_space(self, ship_xy_location):
         '''
