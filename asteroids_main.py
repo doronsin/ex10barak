@@ -140,10 +140,10 @@ class GameRunner:
         :return:
         """
         if direction == GameRunner.RIGHT_IDICATOR:
-            i = self.__ship.get_deg() - GameRunner.SHIP_DIRECTION_CHANGE_IN_DEGREES
+            new_deg = self.__ship.get_deg() - GameRunner.SHIP_DIRECTION_CHANGE_IN_DEGREES
         else:
-            i = self.__ship.get_deg() + GameRunner.SHIP_DIRECTION_CHANGE_IN_DEGREES
-        self.__ship.set_deg(i)
+            new_deg = self.__ship.get_deg() + GameRunner.SHIP_DIRECTION_CHANGE_IN_DEGREES
+        self.__ship.set_deg(new_deg)
 
     def asteroid_ship_intersection(self, asteroid):
         """
@@ -171,7 +171,7 @@ class GameRunner:
             self.__torpedos.append(new_torpedo)
             new_torpedo.register_torpedo(self.__screen)
 
-    def draw_torpedo(self, torpedo):
+    def update_torpedo(self, torpedo):
         """
         Draw the torpedo on the screen for 200 rounds. After that delete it
         """
@@ -188,13 +188,20 @@ class GameRunner:
         This function is called when a torpedo hits an asteroid. It is updating the score, unregister the asteroid and
         call the blow() function (see below)
         """
-        self.__score += self.SCORE_DICT[asteroid.get_size()]
-        self.__screen.set_score(self.__score)
+        self.add_to_score(self.SCORE_DICT[asteroid.get_size()])
         self.blow(asteroid, torpedo)
         asteroid.unregister_asteroid(self.__screen)
         self.__asteroids.remove(asteroid)
         self.__screen.unregister_torpedo(torpedo)
         self.__torpedos.remove(torpedo)
+
+    def add_to_score(self, points_to_add):
+        """
+        this function addes points to the current score
+        :param points_to_add: the number of points to add
+        """
+        self.__score += points_to_add
+        self.__screen.set_score(self.__score)
 
     def blow(self, asrto, torp):
         """
@@ -219,13 +226,13 @@ class GameRunner:
         :param ship_xy_location:
         :return: True if the ship will land at a place with asteroid, false otherwise
         """
-        for i in self.__asteroids:
-            astr_xy_location = i.get_x(), i.get_y()
-            if ship_xy_location == astr_xy_location:
+        for asteroid in self.__asteroids:
+            demo_ship = sh.Ship(ship_xy_location[0], 0, ship_xy_location[1], 0, 0)
+            if asteroid.has_intersection(demo_ship):
                 return True
         return False
 
-    def teleport_ship(self, ship):
+    def teleport_ship(self):
         """
         This function responsible to find an empty location of a ship and sent it there
         """
@@ -235,9 +242,8 @@ class GameRunner:
 
         # once you find an empty space change the location of the ship and move there.
         x, y = ship_xy_location
-        ship.set_x(x)
-        ship.set_y(y)
-        self.move_object(self.__ship)
+        self.__ship.set_x(x)
+        self.__ship.set_y(y)
 
     def check_if_end(self):
         """
@@ -261,30 +267,19 @@ class GameRunner:
         sys.exit(0)
 
     def _game_loop(self):
+        """
+        this function is the main loop of the game
+        """
+        self.deal_with_keyboard_presses()
+        self.deal_with_torpedos()
+        self.deal_with_ship()
+        self.deal_with_asteroids()
+        self.check_if_end()
 
-        if self.__screen.is_right_pressed():
-            self.rotate_ship(GameRunner.RIGHT_IDICATOR)
-
-        if self.__screen.is_left_pressed():
-            self.rotate_ship(GameRunner.LEFT_INDICATOR)
-
-        if self.__screen.is_up_pressed():
-            self.accelerate_ship(self.__ship)
-
-        if self.__screen.is_space_pressed():
-            self.create_torpedo()
-
-        if self.__screen.is_teleport_pressed():
-            self.teleport_ship(self.__ship)
-
-        for torpedo in self.__torpedos:
-            self.draw_torpedo(torpedo)
-
-        self.move_object(self.__ship)
-        self.__ship.draw_ship(self.__screen)
-
-        # This part of the code deals with asterodis: It loops over the asteroids, moves and draw them
-
+    def deal_with_asteroids(self):
+        """
+        this function deal with the asteroids (moving, deleting, blowing...)
+        """
         for asteroid in self.__asteroids:
             self.move_object(asteroid)
             asteroid.draw_asteroid(self.__screen)
@@ -295,7 +290,34 @@ class GameRunner:
                 if asteroid.has_intersection(torpedo):
                     self.asteroid_torpedo_intersection(torpedo, asteroid)
 
-        self.check_if_end()
+    def deal_with_ship(self):
+        """
+        this function deals with the ship (moving it)
+        """
+        self.move_object(self.__ship)
+        self.__ship.draw_ship(self.__screen)
+
+    def deal_with_torpedos(self):
+        """
+        this function deals with the torpedos
+        """
+        for torpedo in self.__torpedos:
+            self.update_torpedo(torpedo)
+
+    def deal_with_keyboard_presses(self):
+        """
+        this function deals with all types of keyboard presses
+        """
+        if self.__screen.is_right_pressed():
+            self.rotate_ship(GameRunner.RIGHT_IDICATOR)
+        if self.__screen.is_left_pressed():
+            self.rotate_ship(GameRunner.LEFT_INDICATOR)
+        if self.__screen.is_up_pressed():
+            self.accelerate_ship(self.__ship)
+        if self.__screen.is_space_pressed():
+            self.create_torpedo()
+        if self.__screen.is_teleport_pressed():
+            self.teleport_ship()
 
 
 def main(amount):
