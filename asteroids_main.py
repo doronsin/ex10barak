@@ -30,8 +30,11 @@ class GameRunner:
     RIGHT_IDICATOR = 'right'
 
     TORPEDO_ACCELERATE_FACTOR = 2
+    SPECIAL_TORPEDO_LIFE = 150
     TORPEDO_LIFE = 200
     MAX_TORPEDO = 10
+    MAX_SPECIAL_TORPEDO = 5
+    SPECIAL_TORPEDO_SPEED_FACTOR = 4
 
     SHIP_DIRECTION_CHANGE_IN_DEGREES = 7
     STARTING_SHIP_DIRECTION = 0
@@ -55,6 +58,7 @@ class GameRunner:
         self.__screen_min_y = Screen.SCREEN_MIN_Y
         self.__asteroids = []
         self.__torpedos = []
+        self.__special_torpedos_counter = 0
         self.__score = 0
 
         # place the ship on the screen in a random location
@@ -156,18 +160,41 @@ class GameRunner:
         asteroid.unregister_asteroid(self.__screen)
         self.__asteroids.remove(asteroid)
 
+    def create_special_torpedo(self):
+        """
+        This function create and register a special torpedo
+        I decided to make the torpedo move in a random direction of the ship, and in faster speed from regular
+        torpedo
+        """
+        # It only create the torpedo if there are less then 10 torpedos in self.torpedo list
+        if self.__special_torpedos_counter < self.MAX_SPECIAL_TORPEDO:
+            torpedo_x = self.__ship.get_x()
+            torpedo_y = self.__ship.get_y()
+            new_direction = random.randint(0, 360)
+            deg_in_rad = GameRunner.DEG_TO_RAD_COEFFICIENT * new_direction
+            torpedo_vx = GameRunner.SPECIAL_TORPEDO_SPEED_FACTOR * (self.__ship.get_vx()
+                + GameRunner.TORPEDO_ACCELERATE_FACTOR * math.cos(deg_in_rad))
+            torpedo_vy = GameRunner.SPECIAL_TORPEDO_SPEED_FACTOR * (self.__ship.get_vy()
+                + GameRunner.TORPEDO_ACCELERATE_FACTOR * math.sin(deg_in_rad))
+            new_torpedo = tor.Torpedo(torpedo_x, torpedo_vx, torpedo_y, torpedo_vy, new_direction,
+                                      GameRunner.SPECIAL_TORPEDO_LIFE)
+            self.__torpedos.append(new_torpedo)
+            new_torpedo.register_torpedo(self.__screen)
+            self.__special_torpedos_counter += 1
+
     def create_torpedo(self):
         """
         This function create and register a torpedo
         """
         # It only create the torpedo if there are less then 10 torpedos in self.torpedo list
-        if len(self.__torpedos) < self.MAX_TORPEDO:
+        if len(self.__torpedos) - self.__special_torpedos_counter < self.MAX_TORPEDO:
             torpedo_x = self.__ship.get_x()
             torpedo_y = self.__ship.get_y()
             deg_in_rad = GameRunner.DEG_TO_RAD_COEFFICIENT * self.__ship.get_deg()
             torpedo_vx = self.__ship.get_vx() + GameRunner.TORPEDO_ACCELERATE_FACTOR * math.cos(deg_in_rad)
             torpedo_vy = self.__ship.get_vy() + GameRunner.TORPEDO_ACCELERATE_FACTOR * math.sin(deg_in_rad)
-            new_torpedo = tor.Torpedo(torpedo_x, torpedo_vx, torpedo_y, torpedo_vy, self.__ship.get_deg())
+            new_torpedo = tor.Torpedo(torpedo_x, torpedo_vx, torpedo_y, torpedo_vy, self.__ship.get_deg(),
+                                      GameRunner.TORPEDO_LIFE)
             self.__torpedos.append(new_torpedo)
             new_torpedo.register_torpedo(self.__screen)
 
@@ -175,13 +202,15 @@ class GameRunner:
         """
         Draw the torpedo on the screen for 200 rounds. After that delete it
         """
-        if torpedo.get_torpedo_life() <= self.TORPEDO_LIFE:
+        if torpedo.get_torpedo_life() <= torpedo.get_max_rounds():
             self.move_object(torpedo)
             torpedo.draw_torpedo(self.__screen)
             torpedo.set_life(torpedo.get_torpedo_life() + 1)
         else:
-            torpedo.unregister_torpedo(self.__screen)
+            if torpedo.get_max_rounds() == GameRunner.SPECIAL_TORPEDO_LIFE: # this is a special torpedo
+                self.__special_torpedos_counter -= 1
             self.__torpedos.remove(torpedo)
+            torpedo.unregister_torpedo(self.__screen)
 
     def asteroid_torpedo_intersection(self, torpedo, asteroid):
         """
@@ -193,6 +222,8 @@ class GameRunner:
         asteroid.unregister_asteroid(self.__screen)
         self.__asteroids.remove(asteroid)
         self.__screen.unregister_torpedo(torpedo)
+        if torpedo.get_max_rounds() == GameRunner.SPECIAL_TORPEDO_LIFE:
+            self.__special_torpedos_counter -= 1
         self.__torpedos.remove(torpedo)
 
     def add_to_score(self, points_to_add):
@@ -318,6 +349,8 @@ class GameRunner:
             self.create_torpedo()
         if self.__screen.is_teleport_pressed():
             self.teleport_ship()
+        if self.__screen.is_special_pressed():
+            self.create_special_torpedo()
 
 
 def main(amount):

@@ -4,7 +4,7 @@ class Torpedo:
     """
     RADIUS = 4
 
-    def __init__(self, x, vx, y, vy, deg):
+    def __init__(self, x, vx, y, vy, deg, max_rounds):
         """
         c-tor of the class
         :param x: x
@@ -19,6 +19,7 @@ class Torpedo:
         self.__vy = vy
         self.__deg = deg
         self.__life = 0  # This is a counter of rounds. After 200 rounds the torpedo will be unregistered
+        self.__max_rounds = max_rounds
 
     def get_x(self):
         """
@@ -110,3 +111,10 @@ class Torpedo:
         :param screen: the screen which the torpedo should be unregistered from
         """
         screen.unregister_torpedo(self)
+
+    def get_max_rounds(self):
+        """
+        getter for the max rounds of the torpedo
+        :return: the max rounds of the torpedo
+        """
+        return self.__max_rounds
